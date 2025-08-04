@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+# Create app directory
+WORKDIR /app
+
+# Copy Node.js 20 package files
+COPY package-node20.json ./package.json
+
+# Install only essential dependencies
+RUN npm install --omit=dev --no-optional
+
+# Copy source code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /app/data /app/latex /app/logs
+
+# Expose port
+EXPOSE 8000
+
+# Start the application
+CMD ["node", "src/index-professional.js"] 

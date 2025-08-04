@@ -1,0 +1,26 @@
+{
+  "name": "mel-25-agent-2-api",
+  "version": "1.0.0",
+  "description": "BCD Marketing Strategy Research API",
+  "main": "src/index-simple.js",
+  "scripts": {
+    "start": "node src/index-simple.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0"
+  },
+  "keywords": [
+    "bcd",
+    "marketing",
+    "research",
+    "agents"
+  ],
+  "author": "MEL-25 Team",
+  "license": "MIT"
+} 

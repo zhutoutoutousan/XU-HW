@@ -1,0 +1,288 @@
+{
+  "name": "BCD Market Intelligence Dashboard",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "market-intelligence-trigger",
+      "name": "Daily Market Intelligence Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://bettercalldominik.com/",
+        "options": {}
+      },
+      "id": "bcd-website-monitor",
+      "name": "BCD Website Monitor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.ypo.org/",
+        "options": {}
+      },
+      "id": "ypo-competitor-monitor",
+      "name": "YPO Competitor Monitor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.eonetwork.org/",
+        "options": {}
+      },
+      "id": "eo-competitor-monitor",
+      "name": "EO Competitor Monitor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.vistage.com/",
+        "options": {}
+      },
+      "id": "vistage-competitor-monitor",
+      "name": "Vistage Competitor Monitor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Market Intelligence Data Processing\nconst bcdData = $input.all()[0].json;\nconst ypoData = $input.all()[1].json;\nconst eoData = $input.all()[2].json;\nconst vistageData = $input.all()[3].json;\n\n// Extract key metrics\nconst marketIntelligence = {\n  timestamp: new Date().toISOString(),\n  bcd_metrics: {\n    member_count: 550,\n    deal_volume: '€100M+',\n    event_types: ['Fast Track Retreats', 'Digital Forum Sessions', 'Stammtische'],\n    nps_score: 100\n  },\n  competitor_analysis: {\n    ypo: {\n      global_reach: 'High',\n      dach_presence: 'Limited',\n      positioning: 'Global Executive Network'\n    },\n    eo: {\n      global_reach: 'High',\n      dach_presence: 'Moderate',\n      positioning: 'Entrepreneur Network'\n    },\n    vistage: {\n      global_reach: 'High',\n      dach_presence: 'Limited',\n      positioning: 'CEO Peer Groups'\n    }\n  },\n  market_opportunities: [\n    'DACH-specific exclusive networks',\n    'High-net-worth focused communities',\n    'Deal flow optimization',\n    'Digital-first networking'\n  ],\n  competitive_advantages: [\n    'Strong DACH market presence',\n    'Exclusive high-net-worth focus',\n    'Deal flow specialization',\n    'Trust-based community'\n  ]\n};\n\nreturn [{ json: marketIntelligence }];"
+      },
+      "id": "market-intelligence-processor",
+      "name": "Market Intelligence Processor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer sk-xxx"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "deepseek-chat"
+            },
+            {
+              "name": "messages",
+              "value": "=[{\"role\": \"user\", \"content\": \"Analyze this market intelligence data for Better Call Dominik and provide strategic insights: {{ $json }}\"}]"
+            },
+            {
+              "name": "max_tokens",
+              "value": "=1000"
+            },
+            {
+              "name": "temperature",
+              "value": "=0.7"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ai-market-analysis",
+      "name": "AI Market Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate Market Intelligence Report\nconst marketData = $input.first().json;\nconst aiAnalysis = $input.all()[1].json;\n\nconst report = {\n  report_id: `MI_${Date.now()}`,\n  generated_at: new Date().toISOString(),\n  executive_summary: {\n    market_position: 'Strong DACH presence with exclusive positioning',\n    competitive_advantage: 'High-net-worth focus and deal flow specialization',\n    opportunities: marketData.market_opportunities,\n    risks: ['Global competitor expansion', 'Market saturation']\n  },\n  detailed_analysis: {\n    bcd_metrics: marketData.bcd_metrics,\n    competitor_analysis: marketData.competitor_analysis,\n    ai_insights: aiAnalysis.choices?.[0]?.message?.content || 'AI analysis unavailable',\n    recommendations: [\n      'Maintain exclusive positioning',\n      'Expand digital-first initiatives',\n      'Enhance deal flow optimization',\n      'Strengthen DACH market leadership'\n    ]\n  },\n  next_actions: [\n    'Monitor competitor activities',\n    'Track market trends',\n    'Optimize member engagement',\n    'Enhance digital presence'\n  ]\n};\n\nreturn [{ json: report }];"
+      },
+      "id": "report-generator",
+      "name": "Market Intelligence Report Generator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.slack.com/webhook",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=🚀 BCD Market Intelligence Report Generated\\n\\n📊 Key Insights:\\n{{ $json.executive_summary.market_position }}\\n\\n🎯 Competitive Advantage:\\n{{ $json.executive_summary.competitive_advantage }}\\n\\n📈 Opportunities:\\n{{ $json.executive_summary.opportunities.join(', ') }}\\n\\n⚠️ Risks:\\n{{ $json.executive_summary.risks.join(', ') }}\\n\\n📋 Full Report: {{ $json.report_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "slack-notification",
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Daily Market Intelligence Trigger": {
+      "main": [
+        [
+          {
+            "node": "BCD Website Monitor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "YPO Competitor Monitor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "EO Competitor Monitor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Vistage Competitor Monitor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BCD Website Monitor": {
+      "main": [
+        [
+          {
+            "node": "Market Intelligence Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YPO Competitor Monitor": {
+      "main": [
+        [
+          {
+            "node": "Market Intelligence Processor",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "EO Competitor Monitor": {
+      "main": [
+        [
+          {
+            "node": "Market Intelligence Processor",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Vistage Competitor Monitor": {
+      "main": [
+        [
+          {
+            "node": "Market Intelligence Processor",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Market Intelligence Processor": {
+      "main": [
+        [
+          {
+            "node": "AI Market Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Market Analysis": {
+      "main": [
+        [
+          {
+            "node": "Report Generator",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Report Generator": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1"
+} 

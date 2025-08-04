@@ -1,0 +1,46 @@
+{
+  "name": "mel-25-agent-2-api",
+  "version": "1.0.0",
+  "description": "BCD Marketing Strategy Research API",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest",
+    "build": "docker build -t mel-25-agent-2-api ."
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.3",
+    "redis": "^4.6.10",
+    "axios": "^1.6.0",
+    "puppeteer": "^21.5.2",
+    "cheerio": "^1.0.0-rc.12",
+    "turndown": "^7.1.2",
+
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0",
+    "joi": "^17.11.0",
+    "multer": "^1.4.5-lts.1",
+    "fs-extra": "^11.1.1",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
+  "keywords": [
+    "bcd",
+    "marketing",
+    "research",
+    "latex",
+    "agents"
+  ],
+  "author": "MEL-25 Team",
+  "license": "MIT"
+} 
