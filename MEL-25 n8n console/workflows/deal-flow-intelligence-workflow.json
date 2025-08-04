@@ -1,0 +1,197 @@
+{
+  "name": "BCD Deal Flow Intelligence",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "deal-flow-trigger",
+      "name": "Deal Flow Intelligence Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulate Deal Flow Data\nconst dealFlowData = {\n  total_deals_shared: 156,\n  successful_matches: 89,\n  total_volume: '€127M',\n  success_rate: 0.57,\n  deal_categories: {\n    private_equity: {\n      count: 45,\n      success_rate: 0.73,\n      avg_volume: '€3.2M',\n      member_interest: 0.85\n    },\n    venture_capital: {\n      count: 38,\n      success_rate: 0.68,\n      avg_volume: '€1.8M',\n      member_interest: 0.78\n    },\n    real_estate: {\n      count: 34,\n      success_rate: 0.82,\n      avg_volume: '€2.5M',\n      member_interest: 0.92\n    },\n    collectibles: {\n      count: 23,\n      success_rate: 0.43,\n      avg_volume: '€850K',\n      member_interest: 0.65\n    },\n    infrastructure: {\n      count: 16,\n      success_rate: 0.56,\n      avg_volume: '€4.1M',\n      member_interest: 0.71\n    }\n  },\n  member_matching_metrics: {\n    high_value_members: {\n      deals_received: 67,\n      deals_matched: 52,\n      success_rate: 0.78,\n      avg_response_time: '1.2 hours'\n    },\n    active_contributors: {\n      deals_received: 89,\n      deals_matched: 37,\n      success_rate: 0.42,\n      avg_response_time: '3.8 hours'\n    }\n  },\n  trending_deals: [\n    {\n      category: 'Real Estate',\n      description: 'DACH region residential portfolio',\n      volume: '€15M',\n      interest_level: 0.94,\n      member_matches: 23\n    },\n    {\n      category: 'Private Equity',\n      description: 'Tech scale-up secondary transaction',\n      volume: '€8.5M',\n      interest_level: 0.87,\n      member_matches: 18\n    },\n    {\n      category: 'Venture Capital',\n      description: 'AI/ML seed round opportunity',\n      volume: '€2.2M',\n      interest_level: 0.79,\n      member_matches: 15\n    }\n  ],\n  timestamp: new Date().toISOString()\n};\n\nreturn [{ json: dealFlowData }];"
+      },
+      "id": "deal-flow-collector",
+      "name": "Deal Flow Data Collector",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Deal Flow Intelligence Analysis\nconst dealData = $input.first().json;\n\nconst dealFlowAnalysis = {\n  overall_performance: {\n    success_rate: dealData.success_rate,\n    total_volume: dealData.total_volume,\n    deals_per_month: Math.round(dealData.total_deals_shared / 6),\n    avg_deal_size: '€1.4M'\n  },\n  category_performance: {\n    best_performing: 'Real Estate',\n    worst_performing: 'Collectibles',\n    opportunities: [\n      'Expand real estate deal flow',\n      'Improve collectibles matching',\n      'Increase infrastructure deals',\n      'Optimize VC deal quality'\n    ]\n  },\n  member_matching_insights: {\n    high_value_members: {\n      success_rate: dealData.member_matching_metrics.high_value_members.success_rate,\n      response_time: dealData.member_matching_metrics.high_value_members.avg_response_time,\n      recommendations: [\n        'Prioritize high-value member matching',\n        'Reduce response time for better deals',\n        'Provide exclusive deal access'\n      ]\n    },\n    active_contributors: {\n      success_rate: dealData.member_matching_metrics.active_contributors.success_rate,\n      response_time: dealData.member_matching_metrics.active_contributors.avg_response_time,\n      recommendations: [\n        'Improve deal quality for active contributors',\n        'Enhance matching algorithms',\n        'Provide better deal descriptions'\n      ]\n    }\n  },\n  trending_opportunities: dealData.trending_deals.map(deal => ({\n    category: deal.category,\n    volume: deal.volume,\n    interest_level: deal.interest_level,\n    member_matches: deal.member_matches,\n    priority: deal.interest_level > 0.8 ? 'High' : deal.interest_level > 0.6 ? 'Medium' : 'Low'\n  })),\n  optimization_opportunities: [\n    'Improve deal flow quality',\n    'Enhance member matching algorithms',\n    'Reduce response times',\n    'Expand high-performing categories',\n    'Develop deal flow automation'\n  ],\n  risks: [\n    'Deal flow quality decline',\n    'Member interest waning',\n    'Competitive deal flow platforms',\n    'Market volatility impact'\n  ]\n};\n\nreturn [{ json: dealFlowAnalysis }];"
+      },
+      "id": "deal-flow-analyzer",
+      "name": "Deal Flow Analyzer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer sk-xxx"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "deepseek-chat"
+            },
+            {
+              "name": "messages",
+              "value": "=[{\"role\": \"user\", \"content\": \"Analyze this deal flow intelligence data for Better Call Dominik and provide strategic recommendations for improving deal matching success rates and member satisfaction: {{ $json }}\"}]"
+            },
+            {
+              "name": "max_tokens",
+              "value": "=1200"
+            },
+            {
+              "name": "temperature",
+              "value": "=0.7"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ai-deal-flow-analysis",
+      "name": "AI Deal Flow Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate Deal Flow Intelligence Report\nconst dealData = $input.all()[0].json;\nconst dealAnalysis = $input.all()[1].json;\nconst aiAnalysis = $input.all()[2].json;\n\nconst report = {\n  report_id: `DF_${Date.now()}`,\n  generated_at: new Date().toISOString(),\n  executive_summary: {\n    total_deals: dealData.total_deals_shared,\n    successful_matches: dealData.successful_matches,\n    success_rate: dealData.success_rate,\n    total_volume: dealData.total_volume,\n    key_insights: [\n      `Success rate: ${(dealData.success_rate * 100).toFixed(1)}%`, \n      `Total volume: ${dealData.total_volume}`,\n      `Best category: ${dealAnalysis.category_performance.best_performing}`,\n      `Trending deals: ${dealAnalysis.trending_opportunities.length} high-priority opportunities`\n    ]\n  },\n  detailed_analysis: {\n    category_performance: dealAnalysis.category_performance,\n    member_matching: dealAnalysis.member_matching_insights,\n    trending_opportunities: dealAnalysis.trending_opportunities,\n    ai_recommendations: aiAnalysis.choices?.[0]?.message?.content || 'AI analysis unavailable',\n    opportunities: dealAnalysis.optimization_opportunities,\n    risks: dealAnalysis.risks\n  },\n  action_items: [\n    'Implement AI-powered deal matching',\n    'Optimize deal flow quality filters',\n    'Enhance member preference algorithms',\n    'Develop automated deal notifications',\n    'Create deal flow analytics dashboard'\n  ],\n  next_actions: [\n    'Prioritize high-value member deals',\n    'Improve deal flow quality',\n    'Optimize matching algorithms',\n    'Develop deal flow automation'\n  ]\n};\n\nreturn [{ json: report }];"
+      },
+      "id": "deal-flow-report-generator",
+      "name": "Deal Flow Report Generator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.slack.com/webhook",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=💰 BCD Deal Flow Intelligence Report Generated\\n\\n📊 Key Metrics:\\n• Total Deals: {{ $json.executive_summary.total_deals }}\\n• Successful Matches: {{ $json.executive_summary.successful_matches }}\\n• Success Rate: {{ ($json.executive_summary.success_rate * 100).toFixed(1) }}%\\n• Total Volume: {{ $json.executive_summary.total_volume }}\\n\\n🎯 Key Insights:\\n{{ $json.executive_summary.key_insights.join('\\n') }}\\n\\n📈 Trending Opportunities: {{ $json.detailed_analysis.trending_opportunities.length }}\\n\\n📋 Full Report: {{ $json.report_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "deal-flow-slack-notification",
+      "name": "Deal Flow Slack Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Deal Flow Intelligence Trigger": {
+      "main": [
+        [
+          {
+            "node": "Deal Flow Data Collector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deal Flow Data Collector": {
+      "main": [
+        [
+          {
+            "node": "Deal Flow Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deal Flow Analyzer": {
+      "main": [
+        [
+          {
+            "node": "AI Deal Flow Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Deal Flow Analysis": {
+      "main": [
+        [
+          {
+            "node": "Deal Flow Report Generator",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Deal Flow Report Generator": {
+      "main": [
+        [
+          {
+            "node": "Deal Flow Slack Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1"
+} 

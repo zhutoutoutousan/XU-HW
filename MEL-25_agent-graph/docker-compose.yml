@@ -1,0 +1,186 @@
+version: '3.8'
+
+services:
+  # Neo4j Graph Database
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: marketing_analysis_neo4j
+    environment:
+      NEO4J_AUTH: neo4j/password
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+    networks:
+      - agent_network
+
+  # Research Storage Service
+  research_storage:
+    build:
+      context: ./research_storage
+      dockerfile: Dockerfile
+    container_name: marketing_analysis_research_storage
+    ports:
+      - "8001:8001"
+    volumes:
+      - research_data:/app/data
+      - research_reports:/app/reports
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+    depends_on:
+      - neo4j
+    networks:
+      - agent_network
+
+  # Ollama LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: marketing_analysis_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - agent_network
+
+  # Agent Orchestrator
+  orchestrator:
+    build:
+      context: ./orchestrator
+      dockerfile: Dockerfile
+    container_name: marketing_analysis_orchestrator
+    ports:
+      - "8000:8000"
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+      - OLLAMA_HOST=ollama:11434
+      - RESEARCH_STORAGE_URL=http://research_storage:8001
+    depends_on:
+      - neo4j
+      - ollama
+      - research_storage
+    networks:
+      - agent_network
+
+  # Research Agent
+  research_agent:
+    build:
+      context: ./agents/research
+      dockerfile: Dockerfile
+    container_name: marketing_analysis_research_agent
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+      - OLLAMA_HOST=http://ollama:11434
+      - AGENT_TYPE=research
+      - RESEARCH_STORAGE_URL=http://research_storage:8001
+    depends_on:
+      - neo4j
+      - ollama
+      - research_storage
+    networks:
+      - agent_network
+
+  # Analysis Agent
+  analysis_agent:
+    build:
+      context: ./agents/analysis
+      dockerfile: Dockerfile
+    container_name: marketing_analysis_analysis_agent
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+      - OLLAMA_HOST=http://ollama:11434
+      - AGENT_TYPE=analysis
+      - RESEARCH_STORAGE_URL=http://research_storage:8001
+      - DEEPSEEK_API_KEY=sk-xxx
+    depends_on:
+      - neo4j
+      - ollama
+      - research_storage
+    networks:
+      - agent_network
+
+  # Strategy Agent
+  strategy_agent:
+    build:
+      context: ./agents/strategy
+      dockerfile: Dockerfile
+    container_name: marketing_analysis_strategy_agent
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+      - OLLAMA_HOST=http://ollama:11434
+      - AGENT_TYPE=strategy
+      - RESEARCH_STORAGE_URL=http://research_storage:8001
+    depends_on:
+      - neo4j
+      - ollama
+      - research_storage
+    networks:
+      - agent_network
+
+  # Report Agent
+  report_agent:
+    build:
+      context: ./agents/report
+      dockerfile: Dockerfile
+    container_name: marketing_analysis_report_agent
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+      - OLLAMA_HOST=http://ollama:11434
+      - AGENT_TYPE=report
+      - RESEARCH_STORAGE_URL=http://research_storage:8001
+    depends_on:
+      - neo4j
+      - ollama
+      - research_storage
+    networks:
+      - agent_network
+
+  # Web Interface
+  web_interface:
+    build:
+      context: ./web_interface
+      dockerfile: Dockerfile
+    container_name: marketing_analysis_web_interface
+    ports:
+      - "3000:3000"
+    environment:
+      - ORCHESTRATOR_URL=http://orchestrator:8000
+      - RESEARCH_STORAGE_URL=http://research_storage:8001
+    depends_on:
+      - orchestrator
+      - research_storage
+    networks:
+      - agent_network
+
+networks:
+  agent_network:
+    driver: bridge
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
+  ollama_data:
+  research_data:
+  research_reports: 

@@ -1,0 +1,6 @@
+# Data directory for MEL-25 Agent-2
+# This directory will contain:
+# - raw/ : Raw scraped data
+# - processed/ : Processed research data
+# - research/ : Research results and analysis
+# - output/ : Generated documents and reports 

@@ -1,0 +1,106 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: agent_network
+      POSTGRES_USER: agent_user
+      POSTGRES_PASSWORD: agent_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - agent_network
+
+  # n8n Workflow Engine
+  n8n:
+    image: n8nio/n8n:latest
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin123
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=agent_network
+      - DB_POSTGRESDB_USER=agent_user
+      - DB_POSTGRESDB_PASSWORD=agent_password
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=UTC
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/home/node/.n8n/workflows
+    ports:
+      - "5678:5678"
+    depends_on:
+      - postgres
+    networks:
+      - agent_network
+
+  # API Server
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://agent_user:agent_password@postgres:5432/agent_network
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/
+      - PORT=8000
+      - OLLAMA_URL=http://ollama:11434
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - n8n
+    networks:
+      - agent_network
+
+  # Frontend Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_WS_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - agent_network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  # Redis for caching and real-time features
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - agent_network
+
+  # Ollama LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - D:/ollama_data:/root/.ollama
+    networks:
+      - agent_network
+
+volumes:
+  postgres_data:
+  n8n_data:
+
+networks:
+  agent_network:
+    driver: bridge 

@@ -1,0 +1,197 @@
+{
+  "name": "BCD Member Engagement Analytics",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "member-engagement-trigger",
+      "name": "Hourly Member Engagement Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulate Member Activity Data\nconst memberData = {\n  total_members: 550,\n  active_members: 420,\n  engagement_metrics: {\n    whatsapp_activity: {\n      total_messages: 1250,\n      active_groups: 8,\n      response_time_avg: '2.3 minutes',\n      engagement_rate: 0.85\n    },\n    event_participation: {\n      fast_track_retreats: {\n        attendance_rate: 0.92,\n        satisfaction_score: 9.8,\n        deals_generated: 45\n      },\n      digital_forum_sessions: {\n        attendance_rate: 0.78,\n        satisfaction_score: 8.9,\n        deals_generated: 23\n      },\n      stammtische: {\n        attendance_rate: 0.85,\n        satisfaction_score: 9.2,\n        deals_generated: 31\n      }\n    },\n    deal_flow_metrics: {\n      total_deals_shared: 156,\n      successful_matches: 89,\n      total_volume: '€127M',\n      success_rate: 0.57\n    },\n    member_segments: {\n      high_value_members: {\n        count: 89,\n        avg_deal_volume: '€2.1M',\n        engagement_score: 9.4\n      },\n      active_contributors: {\n        count: 234,\n        avg_deal_volume: '€850K',\n        engagement_score: 8.7\n      },\n      occasional_participants: {\n        count: 156,\n        avg_deal_volume: '€320K',\n        engagement_score: 6.2\n      },\n      at_risk_members: {\n        count: 71,\n        avg_deal_volume: '€180K',\n        engagement_score: 3.8\n      }\n    }\n  },\n  timestamp: new Date().toISOString()\n};\n\nreturn [{ json: memberData }];"
+      },
+      "id": "member-data-collector",
+      "name": "Member Data Collector",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Member Engagement Analysis\nconst memberData = $input.first().json;\n\n// Calculate engagement scores\nconst engagementAnalysis = {\n  overall_engagement_score: 8.4,\n  key_metrics: {\n    whatsapp_engagement: memberData.engagement_metrics.whatsapp_activity.engagement_rate,\n    event_participation: (memberData.engagement_metrics.event_participation.fast_track_retreats.attendance_rate + \n                         memberData.engagement_metrics.event_participation.digital_forum_sessions.attendance_rate + \n                         memberData.engagement_metrics.event_participation.stammtische.attendance_rate) / 3,\n    deal_flow_participation: memberData.engagement_metrics.deal_flow_metrics.success_rate,\n    member_retention: 0.94\n  },\n  segment_analysis: {\n    high_value_members: {\n      count: memberData.engagement_metrics.member_segments.high_value_members.count,\n      engagement_trend: 'increasing',\n      recommendations: ['Exclusive VIP events', 'Direct deal flow access', 'Personal relationship management']\n    },\n    active_contributors: {\n      count: memberData.engagement_metrics.member_segments.active_contributors.count,\n      engagement_trend: 'stable',\n      recommendations: ['Enhanced networking opportunities', 'Skill development sessions', 'Recognition programs']\n    },\n    occasional_participants: {\n      count: memberData.engagement_metrics.member_segments.occasional_participants.count,\n      engagement_trend: 'declining',\n      recommendations: ['Personalized outreach', 'Simplified participation options', 'Value demonstration']\n    },\n    at_risk_members: {\n      count: memberData.engagement_metrics.member_segments.at_risk_members.count,\n      engagement_trend: 'declining',\n      recommendations: ['Immediate intervention', 'Personal relationship building', 'Value reassessment']\n    }\n  },\n  opportunities: [\n    'Increase WhatsApp community engagement',\n    'Optimize event formats for higher satisfaction',\n    'Improve deal flow matching success rate',\n    'Develop personalized member experiences',\n    'Implement proactive retention strategies'\n  ],\n  risks: [\n    'Declining engagement in occasional participants',\n    'At-risk member churn',\n    'Deal flow quality maintenance',\n    'Competitive pressure on exclusive positioning'\n  ]\n};\n\nreturn [{ json: engagementAnalysis }];"
+      },
+      "id": "engagement-analyzer",
+      "name": "Engagement Analyzer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer sk-xxx"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "deepseek-chat"
+            },
+            {
+              "name": "messages",
+              "value": "=[{\"role\": \"user\", \"content\": \"Analyze this member engagement data for Better Call Dominik and provide strategic recommendations for improving member engagement and retention: {{ $json }}\"}]"
+            },
+            {
+              "name": "max_tokens",
+              "value": "=1200"
+            },
+            {
+              "name": "temperature",
+              "value": "=0.7"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ai-engagement-analysis",
+      "name": "AI Engagement Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate Member Engagement Report\nconst memberData = $input.all()[0].json;\nconst engagementAnalysis = $input.all()[1].json;\nconst aiAnalysis = $input.all()[2].json;\n\nconst report = {\n  report_id: `ME_${Date.now()}`,\n  generated_at: new Date().toISOString(),\n  executive_summary: {\n    total_members: memberData.total_members,\n    active_members: memberData.active_members,\n    overall_engagement_score: engagementAnalysis.overall_engagement_score,\n    key_insights: [\n      'High engagement in WhatsApp community (85%)',\n      'Strong event participation across all formats',\n      'Deal flow success rate at 57%',\n      'Member retention rate at 94%'\n    ]\n  },\n  detailed_analysis: {\n    segment_performance: engagementAnalysis.segment_analysis,\n    engagement_metrics: engagementAnalysis.key_metrics,\n    ai_recommendations: aiAnalysis.choices?.[0]?.message?.content || 'AI analysis unavailable',\n    opportunities: engagementAnalysis.opportunities,\n    risks: engagementAnalysis.risks\n  },\n  action_items: [\n    'Implement personalized outreach for occasional participants',\n    'Develop retention strategies for at-risk members',\n    'Optimize deal flow matching algorithms',\n    'Enhance WhatsApp community engagement',\n    'Create exclusive experiences for high-value members'\n  ],\n  next_actions: [\n    'Schedule member check-ins',\n    'Plan targeted engagement campaigns',\n    'Optimize event formats',\n    'Develop retention programs'\n  ]\n};\n\nreturn [{ json: report }];"
+      },
+      "id": "engagement-report-generator",
+      "name": "Engagement Report Generator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.slack.com/webhook",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=👥 BCD Member Engagement Report Generated\\n\\n📊 Key Metrics:\\n• Total Members: {{ $json.executive_summary.total_members }}\\n• Active Members: {{ $json.executive_summary.active_members }}\\n• Engagement Score: {{ $json.executive_summary.overall_engagement_score }}/10\\n\\n🎯 Key Insights:\\n{{ $json.executive_summary.key_insights.join('\\n') }}\\n\\n⚠️ At-Risk Members: {{ $json.detailed_analysis.segment_performance.at_risk_members.count }}\\n\\n📋 Full Report: {{ $json.report_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "engagement-slack-notification",
+      "name": "Engagement Slack Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1340,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Hourly Member Engagement Trigger": {
+      "main": [
+        [
+          {
+            "node": "Member Data Collector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Member Data Collector": {
+      "main": [
+        [
+          {
+            "node": "Engagement Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Engagement Analyzer": {
+      "main": [
+        [
+          {
+            "node": "AI Engagement Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Engagement Analysis": {
+      "main": [
+        [
+          {
+            "node": "Engagement Report Generator",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Engagement Report Generator": {
+      "main": [
+        [
+          {
+            "node": "Engagement Slack Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1"
+} 

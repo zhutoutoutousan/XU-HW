@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # API Service
+  api:
+    build: ./api
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/research_db
+      - REDIS_URL=redis://redis:6379
+      - OLLAMA_URL=http://ollama:11434
+      - OLLAMA_MODEL=llama2
+    depends_on:
+      - postgres
+      - redis
+      - ollama
+    volumes:
+      - ./data:/app/data
+      - ./latex:/app/latex
+    networks:
+      - research-network
+
+  # n8n Workflow Engine
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=secure_password
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Europe/Berlin
+    volumes:
+      - ./n8n/data:/home/node/.n8n
+      - ./n8n/workflows:/home/node/.n8n/workflows
+      - ./data:/home/node/.n8n/data
+    depends_on:
+      - postgres
+    networks:
+      - research-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=research_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - research-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - research-network
+
+  # Ollama LLM
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - research-network
+
+  # LaTeX Compilation Service
+  latex:
+    build: ./latex
+    volumes:
+      - ./latex:/app
+      - ./data:/app/data
+    environment:
+      - LATEX_COMPILER=pdflatex
+      - BIBTEX_COMPILER=bibtex
+    networks:
+      - research-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  ollama_data:
+
+networks:
+  research-network:
+    driver: bridge 

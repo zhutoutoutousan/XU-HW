@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # AI Agent Service
+  ai-agent:
+    build:
+      context: ./ai-agent
+      dockerfile: Dockerfile
+    container_name: marketing-ai-agent
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DATABASE_URL=postgresql://postgres:password@database:5432/marketing_intel
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - database
+      - redis
+    volumes:
+      - ./ai-agent:/app
+      - ./data:/app/data
+    networks:
+      - marketing-network
+
+  # Web Scraper Service
+  web-scraper:
+    build:
+      context: ./web-scraper
+      dockerfile: Dockerfile
+    container_name: marketing-web-scraper
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@database:5432/marketing_intel
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - database
+      - redis
+    volumes:
+      - ./web-scraper:/app
+      - ./data:/app/data
+    ports:
+      - "5000:5000"
+    networks:
+      - marketing-network
+
+  # API Gateway Service
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: marketing-api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@database:5432/marketing_intel
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - database
+      - redis
+      - ai-agent
+    volumes:
+      - ./api-gateway:/app
+    networks:
+      - marketing-network
+
+  # Database Service
+  database:
+    image: postgres:15
+    container_name: marketing-database
+    environment:
+      - POSTGRES_DB=marketing_intel
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - marketing-network
+
+  # Redis Service
+  redis:
+    image: redis:7-alpine
+    container_name: marketing-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - marketing-network
+
+volumes:
+  postgres_data:
+
+networks:
+  marketing-network:
+    driver: bridge 
