@@ -58,7 +58,7 @@ Email: t.shao@student.xu-university.de, s.mulukuri@student.xu-university.de}}
 \maketitle
 
 \begin{abstract}
-This paper presents a novel approach to semantic clustering for topic discovery in news articles using state-of-the-art natural language processing techniques and interactive visualization. We developed a comprehensive system that combines advanced embedding models with clustering algorithms to automatically discover and visualize thematic patterns in large text corpora. The system processes 1,430 news articles across three distinct clusters, employing Sentence-BERT \cite{reimers2019sentence} for embedding generation and HDBSCAN \cite{campello2013density} for clustering. Our implementation includes robust error handling, cross-platform timeout support, and an interactive dashboard for result visualization. The results demonstrate effective topic separation with clear cluster boundaries and meaningful thematic groupings. This work contributes to the field of text analytics by providing an efficient, scalable approach to topic discovery that can be applied to various domains beyond news article analysis.
+This paper presents a novel approach to semantic clustering for topic discovery in news articles using state-of-the-art natural language processing techniques and interactive visualization. We developed a comprehensive system that combines advanced embedding models with clustering algorithms to automatically discover and visualize thematic patterns in large text corpora. The system processes 1,430 news articles across three distinct clusters, employing Sentence-BERT \citep{reimers2019sentence} for embedding generation and HDBSCAN \citep{campello2013density} for clustering. Our implementation includes robust error handling, cross-platform timeout support, and an interactive dashboard for result visualization. The results demonstrate effective topic separation with clear cluster boundaries and meaningful thematic groupings. This work contributes to the field of text analytics by providing an efficient, scalable approach to topic discovery that can be applied to various domains beyond news article analysis.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -66,9 +66,9 @@ semantic clustering, topic discovery, natural language processing, BERT embeddin
 \end{IEEEkeywords}
 
 \section{Introduction}
-The exponential growth of digital text content has created an urgent need for efficient methods to automatically discover and analyze thematic patterns in large document collections. Traditional approaches to topic modeling often struggle with semantic nuances and require significant manual tuning. This paper presents a novel system that combines modern deep learning-based embedding techniques \cite{devlin2018bert,vaswani2017attention} with advanced clustering algorithms to automatically discover and visualize topics in news article collections.
+The exponential growth of digital text content has created an urgent need for efficient methods to automatically discover and analyze thematic patterns in large document collections. Traditional approaches to topic modeling often struggle with semantic nuances and require significant manual tuning. This paper presents a novel system that combines modern deep learning-based embedding techniques \citep{devlin2018bert,vaswani2017attention} with advanced clustering algorithms to automatically discover and visualize topics in news article collections.
 
-Our approach leverages the semantic understanding capabilities of transformer-based models while addressing practical challenges in processing large text corpora. The system includes an interactive visualization dashboard that enables intuitive exploration of discovered topics and their relationships \cite{plotly2015}. We demonstrate the effectiveness of our approach through a comprehensive analysis of 1,430 news articles, achieving clear topic separation and meaningful cluster formation.
+Our approach leverages the semantic understanding capabilities of transformer-based models while addressing practical challenges in processing large text corpora. The system includes an interactive visualization dashboard that enables intuitive exploration of discovered topics and their relationships \citep{plotly2015}. We demonstrate the effectiveness of our approach through a comprehensive analysis of 1,430 news articles, achieving clear topic separation and meaningful cluster formation.
 
 \section{System Architecture}
 The system architecture consists of four main components: data collection, data processing, clustering, and visualization. Figure \ref{fig:architecture} illustrates the overall system architecture and data flow.
@@ -81,7 +81,7 @@ The system architecture consists of four main components: data collection, data 
 \end{figure}
 
 \subsection{Data Collection}
-The data collection component employs a web crawler built using the Scrapy framework \cite{scrapy2021} to gather news articles from various sources. The crawler implements polite crawling practices with appropriate delays and robots.txt compliance. Collected data includes article text, title, publication date, source URL, and metadata.
+The data collection component employs a web crawler built using the Scrapy framework \citep{scrapy2021} to gather news articles from various sources. The crawler implements polite crawling practices with appropriate delays and robots.txt compliance. Collected data includes article text, title, publication date, source URL, and metadata.
 
 \subsection{Data Processing Pipeline}
 The processing pipeline includes several key stages, as illustrated in Figure \ref{fig:dataflow}:
@@ -101,8 +101,8 @@ The processing pipeline includes several key stages, as illustrated in Figure \r
             \item Stopword elimination using NLTK
             \item Named Entity Recognition for enhanced feature extraction
         \end{itemize}
-    \item Embedding Generation: Using Sentence-BERT \cite{reimers2019sentence} (specifically 'all-mpnet-base-v2') for document-level embeddings, producing 768-dimensional vectors
-    \item Dimensionality Reduction: UMAP \cite{mcinnes2017umap} implementation for visualization and clustering preparation with the following parameters:
+    \item Embedding Generation: Using Sentence-BERT \citep{reimers2019sentence} (specifically 'all-mpnet-base-v2') for document-level embeddings, producing 768-dimensional vectors
+    \item Dimensionality Reduction: UMAP \citep{mcinnes2017umap} implementation for visualization and clustering preparation with the following parameters:
         \begin{itemize}
             \item n\_neighbors: 15
             \item min\_dist: 0.1
@@ -114,7 +114,7 @@ The processing pipeline includes several key stages, as illustrated in Figure \r
 The pipeline is designed for robustness and scalability, with comprehensive error handling and logging at each stage. We implemented parallel processing for the embedding generation phase to improve performance when handling large document collections.
 
 \subsection{Clustering Approach}
-Our clustering implementation primarily uses HDBSCAN \cite{campello2013density} with the following configuration:
+Our clustering implementation primarily uses HDBSCAN \citep{campello2013density} with the following configuration:
 \begin{itemize}
     \item min\_cluster\_size: 50 (chosen based on corpus size)
     \item min\_samples: 5 (for noise reduction)
@@ -158,7 +158,7 @@ The topic word cloud display initially encountered ValueError issues when conver
             \item Implemented proper data serialization
             \item Enhanced error messaging
         \end{itemize}
-    \item Enhanced word cloud generation \cite{mcinerney2017exploring}:
+    \item Enhanced word cloud generation \citep{mcinerney2017exploring}:
         \begin{itemize}
             \item Added frequency thresholding
             \item Implemented stopword filtering
@@ -270,7 +270,7 @@ The visualizations reveal several important insights:
 \end{itemize}
 
 \subsection{Interactive Visualization Dashboard}
-The interactive dashboard, built using Plotly Dash \cite{plotly2015}, provides multiple views of the clustered data:
+The interactive dashboard, built using Plotly Dash \citep{plotly2015}, provides multiple views of the clustered data:
 \begin{itemize}
     \item 2D scatter plot of reduced dimensions with color-coded clusters:
         \begin{itemize}
